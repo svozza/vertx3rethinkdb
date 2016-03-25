@@ -12,13 +12,18 @@ public class ServerVerticle extends AbstractVerticle {
 
     @Override
     public void start(Future<Void> fut) {
+
+        vertx.deployVerticle("com.example.rethinkdb.ScoreUpdateVerticle");
+
         DeploymentOptions deployOpts = new DeploymentOptions().setWorker(true).setMultiThreaded(true).setInstances(4);
         vertx.deployVerticle("com.example.rethinkdb.ScoreWorkerVerticle", deployOpts, res -> {
             Router router = Router.router(vertx);
 
-            router.route("/").handler(rc -> {
+            router.route("/scores/:id").handler(rc -> {
                 final DeliveryOptions opts = new DeliveryOptions()
                         .setSendTimeout(2000);
+                opts.addHeader("method", "getScore")
+                        .addHeader("id", rc.request().getParam("id"));
                 vertx.eventBus().send("com.example.score", null, opts, reply -> {
                     rc.response()
                             .setStatusMessage("OK")
@@ -26,6 +31,9 @@ public class ServerVerticle extends AbstractVerticle {
                             .end(reply.result().body().toString());
                 });
             });
+
+            vertx.eventBus().consumer("com.example.score.updates")
+                    .handler(msg -> System.out.println(msg.body().toString()));
 
             vertx
                     .createHttpServer()
