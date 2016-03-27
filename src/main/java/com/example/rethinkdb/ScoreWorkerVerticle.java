@@ -1,7 +1,5 @@
 package com.example.rethinkdb;
 
-
-import com.rethinkdb.net.Cursor;
 import io.vertx.core.json.*;
 
 import io.vertx.core.AbstractVerticle;
@@ -31,7 +29,7 @@ public class ScoreWorkerVerticle extends AbstractVerticle {
             case "getScore":
                 int id = Integer.parseInt(msg.headers().get("id"));
                 HashMap m = r.db("test").table("scores").get(id).run(conn);
-                msg.reply(Json.encodePrettily(m));
+                msg.reply(Json.encode(m));
         }
         conn.close();
     }

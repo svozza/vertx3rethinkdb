@@ -5,7 +5,6 @@ import com.rethinkdb.net.Connection;
 import com.rethinkdb.net.Cursor;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
 
@@ -26,7 +25,7 @@ public class ScoreUpdateVerticle extends AbstractVerticle {
                         .getField("new_val").run(conn);
 
                 for (HashMap item : cur)
-                    vertx.eventBus().publish("com.example.score.updates", Json.encodePrettily(item));
+                    vertx.eventBus().publish("com.example.score.updates", Json.encode(item));
             }
             catch (Exception e) {
                 System.err.println("Error: changefeed failed");
